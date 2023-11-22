@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Attendance</title>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+  <style>
+    /*css codes*/
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: flex-start; 
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: row; 
+      width: 70%; 
+    }
+
+    #leftColumn {
+      width: 30%; 
+      padding: 20px; 
+      box-sizing: border-box;
+    }
+
+    #rightColumn {
+      width: 70%; 
+      padding: 20px; 
+      box-sizing: border-box; 
+    }
+
+    #attendanceInfo {
+      margin-bottom: 10px;
+    }
+
+    #nameList {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .nameItem {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px;
+      margin: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    label, input {
+      display: block;
+      width: 80%;
+      height: 35px;
+      margin-bottom: 10px;
+    }
+
+    #checkAttendanceButton, #addNameButton{
+      width: 80%;
+      height: 40px;
+      font-weight: bold;
+      margin-bottom: 55px;
+      display: block;
+    }
+
+    p {
+      font-size: 18px; 
+    }
+
+    #revealName {
+     font-size: 13px;
+     margin-top: 0;
+     margin-bottom: 20px;
+     font-style: italic;
+    }
+
+    h2 {
+      margin-bottom: 0px;
+    }
+
+  </style>
+
+</head>
+<body>
+
+<div id="app">
+  <div id="leftColumn">
+    <h3>Attendance Input</h3> <!-- left side of the display. input the section name and no. of students -->
+    <h4>Section Name:<input type="text" id="sectionName" placeholder="Enter section name"></h4>
+    <h4>Total number of Students: <input type="number" id="numStudents" placeholder="Enter number of students"></h4>
+    <button id="checkAttendanceButton">Proceed</button> 
+  </div>
+
+  <div id="rightColumn"> <!-- right side of the display. input the students name -->
+    <h2>Attendance Sheet of <span id="attendanceHeader"></span></h2>
+    <p id="revealName"></p>
+    <div id="attendanceInfo"> <!-- diplay the number of students total, present, and absent-->
+      Total Students: <span id="totalStudents">0</span> |
+      Present: <span id="presentCount">0</span> |
+      Absent: <span id="absentCount">0</span>
+    </div>
+    
+    <h4>Student Name: <input type="text" id="nameInput" placeholder="Enter student name"></h4>
+    <button id="addNameButton">Present Student</button>
+    <h3>Present Student Names:</h3>
+    <ul id="nameList"></ul>
+  </div>
+</div>
+
+<script>
+  var total = 0;
+  $(document).ready(function() {
+    const NameListModule = (function () {
+      const names = [];
+
+      function renderNames() {
+        const nameList = $('#nameList');
+        nameList.empty(); // Clear previous list
+
+        names.forEach((name, index) => {
+          const listItem = $('<li>', { class: 'nameItem' });
+
+          const nameText = $('<span>').text(name);
+          listItem.append(nameText);
+
+          const removeButton = $('<button>', { text: 'X', class: 'del' });
+          removeButton.on('click', () => removeName(index));
+          listItem.append(removeButton);
+
+          nameList.append(listItem);
+        });
+
+        updateAttendanceInfo();
+      }
+
+      //add the name inputted to the array
+      function addName(name) {
+        names.push(name.toUpperCase());
+        renderNames();
+      }
+
+      //remove a certain student from the array
+      function removeName(index) {
+        names.splice(index, 1);
+        renderNames();
+      }
+
+      //update the information about the no. of present & absent
+      function updateAttendanceInfo() {
+        const presentCount = names.length;
+        const totalStudents = total;
+        const absentCount = totalStudents - presentCount;
+
+        $('#totalStudents').text(totalStudents);
+        $('#presentCount').text(presentCount);
+        $('#absentCount').text(absentCount);
+      }
+
+      return {
+        addName,
+        removeName,
+      };
+    })();
+
+    // Using jQuery to handle button click for checking attendance
+    $('#checkAttendanceButton').on('click', function() {
+      const sectionName = $('#sectionName').val().trim();
+      const numStudents = $('#numStudents').val();
+
+      if (sectionName !== '' && numStudents !== '' && !isNaN(numStudents) && parseInt(numStudents) > 0) {
+        $('#attendanceHeader').text(`${sectionName}`.toUpperCase());
+        $('#totalStudents').text(`${numStudents}`);
+        total = numStudents;
+        $('#revealName').text("by Stephanie Hart L. Bonganciso of BSIT IV-B");
+        
+        // Clear input fields
+        $('#sectionName').val('');
+        $('#numStudents').val('');
+      } else {
+        alert('Please enter valid section name and number of students.');
+      }
+    });
+
+    // Using jQuery to handle button click for adding student names
+    $('#addNameButton').on('click', function() {
+      const nameInput = $('#nameInput');
+      const name = nameInput.val().trim();
+
+      if (name !== '') {
+        NameListModule.addName(name);
+        nameInput.val(''); // Clear input field
+      }
+    });
+
+    // Using event delegation with jQuery
+    $('#nameList').on('click', 'button.del', function() {
+      const index = $(this).closest('li').index();
+      NameListModule.removeName(index);
+    });
+  });
+</script>
+
+</body>
+</html>
